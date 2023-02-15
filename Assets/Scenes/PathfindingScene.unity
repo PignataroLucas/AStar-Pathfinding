@@ -657,6 +657,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 782041100}
+  - component: {fileID: 782041101}
   m_Layer: 0
   m_Name: A*
   m_TagString: Untagged
@@ -679,6 +680,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &782041101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 782041099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dea4bf3b4a8d55e4697f198e4dc82651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1556046113}
+  gridWorldSize: {x: 50, y: 50}
+  nodeRadius: 0.8
+  unwalkableMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &1224427049
 GameObject:
   m_ObjectHideFlags: 0
@@ -1179,8 +1198,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1785686290}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.582189, y: 0, z: -5.3358493}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 4.9333, y: 4.9333, z: 4.9333}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
