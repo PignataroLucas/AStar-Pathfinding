@@ -7,7 +7,8 @@ public class Grid : MonoBehaviour
     public Vector2 gridWorldSize;
     public float nodeRadius;
     public LayerMask unwalkableMask;
-    
+    private LayerMask walkableMask;
+    private Dictionary<int, int> walkableRegionsDictionary = new Dictionary<int, int>();
     private Node[,] _grid;
 
     private float _nodeDiameter;
@@ -15,11 +16,19 @@ public class Grid : MonoBehaviour
 
     public bool displayGridGizmos;
 
+    public GroundType[] walkableRegion;
+    
+
     private void Awake()
     {
         _nodeDiameter = nodeRadius * 2;
         _gridSizeX = Mathf.RoundToInt(gridWorldSize.x / _nodeDiameter);
         _gridSizeY = Mathf.RoundToInt(gridWorldSize.y / _nodeDiameter);
+        foreach (GroundType region in walkableRegion)
+        {
+            walkableMask.value  |= region.roadMask.value;
+            walkableRegionsDictionary.Add((int)Mathf.Log(region.roadMask.value,2),region.roadPenalty);
+        }
         CreateGird();
     }
 
@@ -43,7 +52,20 @@ public class Grid : MonoBehaviour
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * (x * _nodeDiameter + nodeRadius) 
                                                      + Vector3.forward * (y * _nodeDiameter + nodeRadius);
                 bool walkable = !(Physics.CheckSphere(worldPoint, nodeRadius , unwalkableMask));
-                _grid[x,y] = new Node(walkable,worldPoint,x,y);
+                int movementPenalty = 0;
+                
+                //Raycast Logic
+                if (walkable)
+                {
+                    Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
+                    RaycastHit hit;
+
+                    if (Physics.Raycast(ray,out hit , 100 , walkableMask))
+                    {
+                        walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
+                    }
+                }
+                _grid[x,y] = new Node(walkable,worldPoint,x,y,movementPenalty);
             }
         }
     }
@@ -94,6 +116,13 @@ public class Grid : MonoBehaviour
                Gizmos.DrawCube(n.WorldPosition,Vector3.one * (_nodeDiameter-.1f));
            }    
        }
+    }
+
+    [System.Serializable]
+    public class GroundType
+    {
+        public LayerMask roadMask;
+        public int roadPenalty;  
     }
     
 }
