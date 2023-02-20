@@ -68,6 +68,54 @@ public class Grid : MonoBehaviour
                 _grid[x,y] = new Node(walkable,worldPoint,x,y,movementPenalty);
             }
         }
+        
+        BlurPenaltyMap(3);
+        
+    }
+
+    void BlurPenaltyMap(int blurSize)
+    {
+        int kernelSize = blurSize * 2 + 1;
+        int kernelExtents = (kernelSize - 1) / 2;
+
+        int[,] penaltyHorizontalPass = new int[_gridSizeX, _gridSizeY];
+        int[,] penaltyVerticalPass = new int[_gridSizeX, _gridSizeY];
+
+        for (int y = 0; y < _gridSizeY; y++)
+        {
+            for (int x = -kernelExtents; x <= kernelExtents; x++)
+            {
+                int sampleX = Mathf.Clamp(x, 0, kernelExtents);
+                penaltyHorizontalPass[0, y] += _grid[sampleX, y].MovementPenalty;
+            }
+
+            for (int x = 1; x < _gridSizeX; x++)
+            {
+                int removeIndex = Mathf.Clamp(x - kernelExtents - 1,0,_gridSizeX);
+                int addIndex = Mathf.Clamp(x + kernelExtents,0,_gridSizeX-1);
+
+                penaltyHorizontalPass[x,y] = penaltyHorizontalPass[x-1,y] - _grid[removeIndex,y].MovementPenalty + _grid[addIndex,y].MovementPenalty;
+            }
+        }
+        
+        for (int x = 0; x < _gridSizeX; x++)
+        {
+            for (int y = -kernelExtents; y <= kernelExtents; y++)
+            {
+                int sampleY = Mathf.Clamp(y, 0, kernelExtents);
+                penaltyVerticalPass[x, 0] += penaltyHorizontalPass[x,sampleY];
+            }
+
+            for (int y = 1; y < _gridSizeY; y++)
+            {
+                int removeIndex = Mathf.Clamp(y - kernelExtents - 1,0,_gridSizeY);
+                int addIndex = Mathf.Clamp(y + kernelExtents,0,_gridSizeY-1);
+
+                penaltyVerticalPass[x,y] = penaltyVerticalPass[x, y-1] - penaltyHorizontalPass[x,removeIndex] + penaltyHorizontalPass[x,addIndex];
+                int blurredPenalty = Mathf.RoundToInt((float) penaltyVerticalPass[x, y] / (kernelSize * kernelSize));
+                _grid[x, y].MovementPenalty = blurredPenalty;
+            }
+        }
     }
 
     public List<Node> GetNeighbours(Node node)
