@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
     public Transform target;
     public float speed = 5;
+    public float turnSpeed = 3;
     //private Vector3[] path;
     //private int targetIndex;
     public float turnDistance = 4f;
@@ -23,9 +25,7 @@ public class Unit : MonoBehaviour
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
         if (pathSuccessful)
-        {
-            
-            //path = newPath;
+        {    //path = newPath;
             //targetIndex = 0;
             _path = new Path(newPath, transform.position, turnDistance);
             StopCoroutine("FollowPath"); 
@@ -36,9 +36,13 @@ public class Unit : MonoBehaviour
     IEnumerator FollowPath()
     {
         //Vector3 currentWaypoint = path[0];
-
-        while (true)
+        bool followingPath = true;
+        int pathIndex = 0;
+        transform.LookAt(_path.LookPoints[0]); 
+        
+        while (followingPath)
         {
+           
             /*if (transform.position == currentWaypoint)
             {
                 targetIndex++;
@@ -51,9 +55,27 @@ public class Unit : MonoBehaviour
             }
 
             transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed * Time.deltaTime);*/
-            
-            
-                
+
+            Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
+            while (_path.TurnBoundaries[pathIndex].HasCrossedLine(pos2D))
+            {
+                if (pathIndex == _path.FinishLineIndex)
+                {
+                    //we finish the path
+                    followingPath = false;
+                    break;
+                }
+                else
+                {
+                    pathIndex++;
+                }
+            }
+            if (followingPath)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(_path.LookPoints[pathIndex]-transform.position);
+                transform.rotation = Quaternion.Lerp(transform.rotation,targetRotation,Time.deltaTime * turnSpeed);
+                transform.Translate(Vector3.forward * Time.deltaTime * speed , Space.Self);
+            }
             yield return null; 
         }
     }
