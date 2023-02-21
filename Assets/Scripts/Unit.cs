@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
+    private const float MinPathUpdateTime = .2f;
+    private const float PathUpdateMoveThreshold = .5f;
+    
     public Transform target;
     public float speed = 5;
     public float turnSpeed = 3;
@@ -19,17 +22,41 @@ public class Unit : MonoBehaviour
 
     private void Start()
     {
-        PathRequestManager.RequestPath(transform.position,target.position,OnPathFound);
+        //PathRequestManager.RequestPath(transform.position,target.position,OnPathFound);
+        StartCoroutine(UpdatePath());
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
     {
         if (pathSuccessful)
-        {    //path = newPath;
+        {   
+            //path = newPath;
             //targetIndex = 0;
             _path = new Path(newPath, transform.position, turnDistance);
             StopCoroutine("FollowPath"); 
             StartCoroutine("FollowPath"); 
+        }
+    }
+
+    IEnumerator UpdatePath()
+    {
+        if (Time.timeSinceLevelLoad < .3f)
+        {
+            yield return new WaitForSeconds(.3f);
+        }
+        
+        PathRequestManager.RequestPath(transform.position,target.position,OnPathFound);
+        float srqMoveThreshold = PathUpdateMoveThreshold * PathUpdateMoveThreshold;
+        Vector3 targetPositionOld = target.position;
+        
+        while (true)
+        {
+            yield return new WaitForSeconds(MinPathUpdateTime);
+            if ((target.position - targetPositionOld).sqrMagnitude > srqMoveThreshold)
+            {
+                PathRequestManager.RequestPath(transform.position,target.position,OnPathFound);
+                targetPositionOld = target.position;
+            }
         }
     }
 
