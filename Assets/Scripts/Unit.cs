@@ -6,9 +6,14 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     public Transform target;
-    private float speed = 5;
-    private Vector3[] path;
-    private int targetIndex;
+    public float speed = 5;
+    //private Vector3[] path;
+    //private int targetIndex;
+    public float turnDistance = 4f;
+
+    private Path _path;
+    
+    
 
     private void Start()
     {
@@ -19,7 +24,10 @@ public class Unit : MonoBehaviour
     {
         if (pathSuccessful)
         {
-            path = newPath;
+            
+            //path = newPath;
+            //targetIndex = 0;
+            _path = new Path(newPath, transform.position, turnDistance);
             StopCoroutine("FollowPath"); 
             StartCoroutine("FollowPath"); 
         }
@@ -27,11 +35,11 @@ public class Unit : MonoBehaviour
 
     IEnumerator FollowPath()
     {
-        Vector3 currentWaypoint = path[0];
+        //Vector3 currentWaypoint = path[0];
 
         while (true)
         {
-            if (transform.position == currentWaypoint)
+            /*if (transform.position == currentWaypoint)
             {
                 targetIndex++;
                 if (targetIndex >= path.Length)
@@ -42,7 +50,9 @@ public class Unit : MonoBehaviour
                 currentWaypoint = path[targetIndex]; 
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, currentWaypoint, speed * Time.deltaTime);*/
+            
+            
                 
             yield return null; 
         }
@@ -50,9 +60,10 @@ public class Unit : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (path != null)
+        if (_path != null)
         {
-            for (int i = targetIndex; i < path.Length; i++)
+            _path.DrawWithGizmos();
+            /*for (int i = targetIndex; i < path.Length; i++)
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawCube(path[i], Vector3.one);
@@ -65,7 +76,7 @@ public class Unit : MonoBehaviour
                 {
                     Gizmos.DrawLine(path[i-1],path[i]);
                 }
-            }
+            }*/
         }
     }
 }
