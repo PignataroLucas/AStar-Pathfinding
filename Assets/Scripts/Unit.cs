@@ -15,13 +15,14 @@ public class Unit : MonoBehaviour
     public float turnDistance = 4f;
 
     private Path _path;
-    
-    
+
+    private Animator _animator;
 
     private void Start()
     {
         //PathRequestManager.RequestPath(transform.position,target.position,OnPathFound);
         StartCoroutine(UpdatePath());
+        _animator = GetComponent<Animator>();
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccessful)
@@ -64,7 +65,7 @@ public class Unit : MonoBehaviour
         bool followingPath = true;
         int pathIndex = 0;
         transform.LookAt(_path.LookPoints[0]);
-
+        
         float speedPercent = 1f;
         
         while (followingPath)
@@ -89,6 +90,7 @@ public class Unit : MonoBehaviour
                 if (pathIndex == _path.FinishLineIndex)
                 {
                     //we finish the path
+                    //transform.LookAt(target.position);
                     followingPath = false;
                     break;
                 }
@@ -102,13 +104,34 @@ public class Unit : MonoBehaviour
                 if (pathIndex >= _path.SlowDownIndex && stopDistance > 0)
                 {
                     speedPercent = Mathf.Clamp01(_path.TurnBoundaries[_path.FinishLineIndex].DistanceFromPoint(pos2D) / stopDistance);
-                    //transform.LookAt(target.position);
-                    if (speedPercent < 0.01f)
+                    //_animator.SetBool("StartWalk",true);
+                    Debug.Log(speedPercent);
+                    if (speedPercent < 0.9f)
                     {
-                        //Maybe do the look at here
+                        speed = 1;
+                        _animator.SetBool("StartWalk", true);
+                    }
+                    if (speedPercent <= 0.3f)
+                    {
+                        _animator.SetBool("StartWalk", false);
+                        _animator.SetBool("StartIdle", true);
                         followingPath = false;
                     }
                 }
+
+                #region Experimental
+
+                //Vector3 nextDirection = _path.LookPoints[pathIndex] - transform.position;
+                //float distanceToNextPoint = nextDirection.magnitude;
+                
+                /*if (distanceToNextPoint > 0.01f)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(nextDirection);
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
+                }*/
+
+                #endregion
+               
                 Quaternion targetRotation = Quaternion.LookRotation(_path.LookPoints[pathIndex]-transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation,targetRotation,Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * (Time.deltaTime * speed * speedPercent) , Space.Self);

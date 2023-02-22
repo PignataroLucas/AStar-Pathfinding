@@ -43,6 +43,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Path.cs" />
      <Compile Include="Assets\Scripts\Node.cs" />
+     <Compile Include="Assets\DWARF\Scene\Script\buttondraftfree.cs" />
      <Compile Include="Assets\Scripts\Line.cs" />
      <Compile Include="Assets\Scripts\Unit.cs" />
      <Compile Include="Assets\Scripts\Pathfinding.cs" />
