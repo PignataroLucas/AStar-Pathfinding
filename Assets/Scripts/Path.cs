@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Path
@@ -7,8 +5,9 @@ public class Path
     public readonly Vector3[] LookPoints;
     public readonly Line[] TurnBoundaries;
     public readonly int FinishLineIndex;
+    public readonly int SlowDownIndex;
 
-    public Path(Vector3[] waypoints, Vector3 startPos, float turnDist)
+    public Path(Vector3[] waypoints, Vector3 startPos, float turnDist,float stopingDistance)
     {
         LookPoints = waypoints;
         TurnBoundaries = new Line[LookPoints.Length];
@@ -23,6 +22,18 @@ public class Path
             TurnBoundaries[i] = new Line(turnBoundaryPoint, previousPoint - dirToCurrentPoint * turnDist);
             previousPoint = turnBoundaryPoint;
         }
+
+        float dstFromEndPoint = 0;
+        for (int i = LookPoints.Length - 1 ; i > 0; i--)
+        {
+            dstFromEndPoint += Vector3.Distance(LookPoints[i], LookPoints[i - 1]);
+            if (dstFromEndPoint > stopingDistance)
+            {
+                SlowDownIndex = i;
+                break;
+            }
+        }
+
     }
 
     Vector2 V3ToV2(Vector3 v3)

@@ -1,7 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Unit : MonoBehaviour
@@ -12,6 +9,7 @@ public class Unit : MonoBehaviour
     public Transform target;
     public float speed = 5;
     public float turnSpeed = 3;
+    public float stopDistance = 10f;
     //private Vector3[] path;
     //private int targetIndex;
     public float turnDistance = 4f;
@@ -32,7 +30,7 @@ public class Unit : MonoBehaviour
         {   
             //path = newPath;
             //targetIndex = 0;
-            _path = new Path(newPath, transform.position, turnDistance);
+            _path = new Path(newPath, transform.position, turnDistance,stopDistance);
             StopCoroutine("FollowPath"); 
             StartCoroutine("FollowPath"); 
         }
@@ -65,7 +63,9 @@ public class Unit : MonoBehaviour
         //Vector3 currentWaypoint = path[0];
         bool followingPath = true;
         int pathIndex = 0;
-        transform.LookAt(_path.LookPoints[0]); 
+        transform.LookAt(_path.LookPoints[0]);
+
+        float speedPercent = 1f;
         
         while (followingPath)
         {
@@ -99,9 +99,19 @@ public class Unit : MonoBehaviour
             }
             if (followingPath)
             {
+                if (pathIndex >= _path.SlowDownIndex && stopDistance > 0)
+                {
+                    speedPercent = Mathf.Clamp01(_path.TurnBoundaries[_path.FinishLineIndex].DistanceFromPoint(pos2D) / stopDistance);
+                    //transform.LookAt(target.position);
+                    if (speedPercent < 0.01f)
+                    {
+                        //Maybe do the look at here
+                        followingPath = false;
+                    }
+                }
                 Quaternion targetRotation = Quaternion.LookRotation(_path.LookPoints[pathIndex]-transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation,targetRotation,Time.deltaTime * turnSpeed);
-                transform.Translate(Vector3.forward * Time.deltaTime * speed , Space.Self);
+                transform.Translate(Vector3.forward * (Time.deltaTime * speed * speedPercent) , Space.Self);
             }
             yield return null; 
         }

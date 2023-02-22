@@ -1166,7 +1166,7 @@ MonoBehaviour:
   unwalkableMask:
     serializedVersion: 2
     m_Bits: 64
-  displayGridGizmos: 0
+  displayGridGizmos: 1
   walkableRegion:
   - roadMask:
       serializedVersion: 2
@@ -1786,8 +1786,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1563444985}
-  speed: 5
+  speed: 8
   turnSpeed: 3
+  stopDistance: 10
   turnDistance: 3
 --- !u!136 &1556046115
 CapsuleCollider:
